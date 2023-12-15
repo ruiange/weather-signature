@@ -1,0 +1,6 @@
+{
+  "compilerOptions": {
+    "esModuleInterop": true,
+    // 其他选项...
+  }
+}
