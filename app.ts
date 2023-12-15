@@ -1,16 +1,12 @@
 import sharp from 'sharp';
 import {v4 as uuidv4} from 'uuid';
+import axios from "axios";
 
 interface queryInfoData {
-    text: string,
-    width: number,
-    height: number,
-    left: number,
-    top: number,
-    rotate: number,
-    color: { r: number, g: number, b: number, alpha: number }
+    real:'',
+    humidity:''
 }
-
+const color = '#2488B8' //文字颜色
 // 读取要合成的图片
 const bgImage = sharp('public/images/bg.png');//读取背景图
 const image2 = sharp('public/images/dyun.png');
@@ -27,22 +23,18 @@ export const mergeImages = async (queryInfo?: queryInfoData) => {
             background: {r: 255, g: 255, b: 255, alpha: 0} // 设置背景为透明
         }
     });
-    const newtext = {
-        text: '你好',
-        width: 100,
-        height: 100,
-        left: 200,
-        top: 200,
-        rotate: 0,
-        color: {r: 0, g: 0, b: 0, alpha: 255},
-        bgColor: {r: 255, g: 255, b: 255, alpha: 0}
+
+    const firstLine = {
+        text: `<span foreground="${color}">温度：${queryInfo.real} 湿度: ${queryInfo.humidity}%RH</span>`,
+        rgba: true,
+        width: 200,
     }
 
     // 使用数组提供多个图层
     canvas.composite([
         {input: await bgImage.toBuffer(), left: 0, top: 0},
         {input: await image2.toBuffer(), left: 70, top: 50},
-        {input: {text: newtext}, left: 200, top: 80}
+        {input: {text: firstLine}, left: 160, top: 70}
     ]);
     // 生成唯一的文件名
     const outputFileName = `output/${uuidv4()}.png`;
@@ -51,6 +43,19 @@ export const mergeImages = async (queryInfo?: queryInfoData) => {
     await canvas.toFile('output/output.png');
 
 }
-mergeImages().then(() => {
-    console.log('done');
-})
+
+
+/**
+ * 获取天气数据
+ */
+export const getWeatherData = async (city = '北京') => {
+    const {data} =await axios.get('https://apis.tianapi.com/tianqi/index', {
+        params: {
+            key: '9d146c513697e92404b90a66a3caa9e1',
+            city: city,
+            type: 1
+        }
+    })
+    mergeImages(data.result)
+}
+getWeatherData()
