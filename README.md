@@ -18,7 +18,7 @@
 
 - [node.js](https://nodejs.org/en/)
 - [express](https://expressjs.com/)
-- [天行api](https://www.tianapi.com/) 
+- [天行api](https://www.tianapi.com/apiview/72) 
 - [七牛云存储](https://www.qiniu.com/)
 
 #### 功能
