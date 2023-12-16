@@ -1,61 +1,52 @@
-import sharp from 'sharp';
-import {v4 as uuidv4} from 'uuid';
-import axios from "axios";
+import express, {Request, Response} from 'express';
+import {getWeatherData} from "./src/generate";
+import path from 'path';
+import UAParser from 'ua-parser-js';
+const app = express();
 
-interface queryInfoData {
-    real:'',
-    humidity:''
-}
-const color = '#2488B8' //文字颜色
-// 读取要合成的图片
-const bgImage = sharp('public/images/bg.png');//读取背景图
-const image2 = sharp('public/images/dyun.png');
-export const mergeImages = async (queryInfo?: queryInfoData) => {
-    console.log(queryInfo);
-    // 获取图片的信息
-    const {width: bgWidth, height: bgHeight} = await bgImage.metadata();//获取背景图宽高 用于定义画布宽高
-    // 创建一个空白的Canvas
-    const canvas = sharp({
-        create: {
-            width: bgWidth,
-            height: bgHeight,
-            channels: 4, // RGBA
-            background: {r: 255, g: 255, b: 255, alpha: 0} // 设置背景为透明
-        }
-    });
 
-    const firstLine = {
-        text: `<span foreground="${color}">温度：${queryInfo.real} 湿度: ${queryInfo.humidity}%RH</span>`,
-        rgba: true,
-        width: 200,
+app.use((req: Request, res: Response, next) => {
+    const clientIP: string = req.headers['x-forwarded-for'] as string || req.ip;
+    req['clientIP'] = clientIP;
+    next();
+});
+
+// 指定虚拟路径，将 output 目录映射到 /images 路径
+app.use('/images', express.static('output'));
+
+app.get('/', async (req: Request, res: Response) => {
+    const clientIP: string = req['clientIP'] || 'Unknown';
+    const {query, protocol} = req
+    const ip = clientIP.replace(/[^0-9.]/g, '') as string;
+
+
+
+    const userAgent = req.get('User-Agent') || '';
+    const parser = new UAParser(userAgent);
+
+
+    const queryParameters = {
+        ip: '114.114.114.114',
+        city: query.city as string || '北京',
+        os: `${parser.getOS().name} ${parser.getOS().version}` || 'unknown',
+        browser: `${parser.getBrowser().name}[${parser.getBrowser().version}]` || 'unknown',
     }
 
-    // 使用数组提供多个图层
-    canvas.composite([
-        {input: await bgImage.toBuffer(), left: 0, top: 0},
-        {input: await image2.toBuffer(), left: 70, top: 50},
-        {input: {text: firstLine}, left: 160, top: 70}
-    ]);
-    // 生成唯一的文件名
-    const outputFileName = `output/${uuidv4()}.png`;
 
-    // 输出合成后的图片
-    await canvas.toFile('output/output.png');
+    const imageName = await getWeatherData(queryParameters) as string;
+    const imagePath = path.join(__dirname, 'output', imageName);
+    const currentDomain = req.get('host');//当前域名
+    const imgUrl = `${protocol}://${currentDomain}/images/${imageName}`;
+    if (query.type === 'json') {
+        res.json({imgUrl});
+    } else {
+        res.sendFile(imagePath);
+    }
+});
 
-}
+// ... 添加其他路由和中间件
 
-
-/**
- * 获取天气数据
- */
-export const getWeatherData = async (city = '北京') => {
-    const {data} =await axios.get('https://apis.tianapi.com/tianqi/index', {
-        params: {
-            key: '9d146c513697e92404b90a66a3caa9e1',
-            city: city,
-            type: 1
-        }
-    })
-    mergeImages(data.result)
-}
-getWeatherData()
+const PORT = process.env.PORT || 4000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
