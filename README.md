@@ -45,7 +45,7 @@ axios.get('http://localhost:4000?type=json')
 #### 注意事项
 
 - 请在config.json中配置你的api key信息
-- [天气预报接口主要天气状态和图标文件名](https://www.tianapi.com/article/164)
+- [天气预报接口主要天气状态和图标文件名](https://s11.ax1x.com/2023/12/17/pi5KJw6.png)
 
 
 
