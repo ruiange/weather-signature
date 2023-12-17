@@ -138,6 +138,9 @@ const getWeatherData = async ({city, ip, os, browser}) => {
             type: 1,
         },
     });
+    if(ip==='1'){
+        ip='127.0.0.1'
+    }
     try {
         const imageUrl = await mergeImages(data.result, ip, os, browser);
         return imageUrl;
