@@ -6,7 +6,6 @@ npm-debug.log
 .idea/
 .vscode/
 output/
-!output/
 ```
 ##.gitignore
 

@@ -1,5 +1,5 @@
 const sharp = require('sharp');
-const { v4: uuidv4 } = require('uuid');
+const {v4: uuidv4} = require('uuid');
 const axios = require('axios');
 const config = require('../config.json');
 const color = '#0c3952'; // 文字颜色
@@ -18,18 +18,20 @@ const tipImg = sharp('public/images/ico/tip.png');
 const systemImg = sharp('public/images/ico/system.png');
 
 const mergeImages = async (weatherInfo, IP, os, browser) => {
-    console.log(weatherInfo.weatherimg)
-    const weatherIcons = sharp(`public/images/${weatherInfo.weatherimg}`);
+
+    const weatherImgUrl = iconNameConversion(weatherInfo.weatherimg)
+
+    const weatherIcons = sharp(`public/images/${weatherImgUrl}`);
     // 获取图片的信息
-    const { width: bgWidth, height: bgHeight } = await bgImage.metadata(); // 获取背景图宽高 用于定义画布宽高
-    const { width: image2Width, height: image2Height } = await ipImg.metadata();
+    const {width: bgWidth, height: bgHeight} = await bgImage.metadata(); // 获取背景图宽高 用于定义画布宽高
+    const {width: image2Width, height: image2Height} = await ipImg.metadata();
     // 创建一个空白的 Canvas
     const canvas = sharp({
         create: {
             width: bgWidth,
             height: bgHeight,
             channels: 4, // RGBA
-            background: { r: 255, g: 255, b: 255, alpha: 0 }, // 设置背景为透明
+            background: {r: 255, g: 255, b: 255, alpha: 0}, // 设置背景为透明
         },
     });
     // 第一行文字 温度 适度
@@ -100,22 +102,22 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
     };
     // 使用数组提供多个图层
     canvas.composite([
-        { input: await bgImage.toBuffer(), left: 0, top: 0 },
-        { input: await weatherIcons.toBuffer(), left: 40, top: 50 },
-        { input: { text: firstLine }, left: 140, top: 80 },
-        { input: { text: secondLine }, left: 140, top: 105 },
-        { input: { text: thirdLine }, left: 140, top: 123 },
-        { input: await ipImg.toBuffer(), left: 140, top: 170 },
-        { input: { text: ipText }, left: 160, top: 173 },
-        { input: await broImg.toBuffer(), left: 280, top: 170 },
-        { input: { text: browserText }, left: 300, top: 173 },
-        { input: await localImg.toBuffer(), left: 140, top: 190 },
-        { input: { text: localText }, left: 160, top: 193 },
-        { input: await systemImg.toBuffer(), left: 280, top: 190 },
-        { input: { text: osText }, left: 300, top: 193 },
-        { input: await tipImg.toBuffer(), left: 140, top: 210 },
-        { input: { text: tipText }, left: 160, top: 212 },
-        { input: { text: weatherText }, left: 65, top: 132 },
+        {input: await bgImage.toBuffer(), left: 0, top: 0},
+        {input: await weatherIcons.toBuffer(), left: 40, top: 50},
+        {input: {text: firstLine}, left: 140, top: 80},
+        {input: {text: secondLine}, left: 140, top: 105},
+        {input: {text: thirdLine}, left: 140, top: 123},
+        {input: await ipImg.toBuffer(), left: 140, top: 170},
+        {input: {text: ipText}, left: 160, top: 173},
+        {input: await broImg.toBuffer(), left: 280, top: 170},
+        {input: {text: browserText}, left: 300, top: 173},
+        {input: await localImg.toBuffer(), left: 140, top: 190},
+        {input: {text: localText}, left: 160, top: 193},
+        {input: await systemImg.toBuffer(), left: 280, top: 190},
+        {input: {text: osText}, left: 300, top: 193},
+        {input: {text: weatherText}, left: 65, top: 132},
+        // {input: await tipImg.toBuffer(), left: 140, top: 210},
+        // {input: {text: tipText}, left: 160, top: 212},
     ]);
     // 生成唯一的文件名
     const outputFileName = `${uuidv4()}.png`;
@@ -126,10 +128,10 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
     });
 };
 
-const getWeatherData = async ({ city, ip, os, browser }) => {
+const getWeatherData = async ({city, ip, os, browser}) => {
     const url = 'https://apis.tianapi.com/tianqi/index';
     const queryCity = city || (ip && ip !== '1' ? ip : '');
-    const { data } = await axios.get(url, {
+    const {data} = await axios.get(url, {
         params: {
             key: config.tianxingKey,
             city: queryCity || '北京',
@@ -138,16 +140,42 @@ const getWeatherData = async ({ city, ip, os, browser }) => {
     });
     try {
         const imageUrl = await mergeImages(data.result, ip, os, browser);
-        console.log('imageUrl')
         return imageUrl;
+
     } catch (error) {
         // 可以根据需要进行错误处理
         throw error;
     }
 };
 
+//图标名称转换
+const iconNameConversion = (icon) => {
+    if (icon.includes('xue')) {
+        return 'xue.png'
+    }
+    if (icon.includes('yu')) {
+        return 'yu.png'
+    }
+    if (icon.includes('wu' || 'mai')) {
+        return 'wu.png'
+    }
+    if (icon.includes('sha')) {
+        return 'sha.png'
+    }
+    if (icon.includes('yin')) {
+        return 'yin.png'
+    }
+    if (icon.includes('duoyun')) {
+        return 'duoyun.png'
+    }
+    if (icon.includes('qing')) {
+        return 'qing.png'
+    }
+    return 'unknow.png'
+}
+
+
 // 导出函数
 module.exports = {
-    mergeImages,
     getWeatherData,
 };

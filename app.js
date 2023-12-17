@@ -25,7 +25,6 @@ app.get('/', async (req, res) => {
         os: `${parser.getOS().name} ${parser.getOS().version}` || 'unknown',
         browser: `${parser.getBrowser().name}[${parser.getBrowser().version}]` || 'unknown',
     };
-    console.log(queryParameters);
     const imageName = await getWeatherData(queryParameters);
     const imagePath = path.join(__dirname, 'output', imageName);
     const currentDomain = req.get('host');
