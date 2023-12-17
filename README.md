@@ -39,12 +39,13 @@ axios.get('http://localhost:4000?type=json')
 - [node.js](https://nodejs.org/en/)
 - [express](https://expressjs.com/)
 - [天行api](https://www.tianapi.com/apiview/72) 
+- [sharp](https://sharp.pixelplumbing.com/)
 
 
 
 #### 注意事项
 
-- 请在config.json中配置你的api key信息
+- 请在config.json中配置你的api key信息（天行api每天可以免费调用1000次）
 - [天气预报接口主要天气状态和图标文件名](https://s11.ax1x.com/2023/12/17/pi5KJw6.png)
 
 
