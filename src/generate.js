@@ -14,7 +14,7 @@ const bgImage = sharp('public/images/bg.png');
 const ipImg = sharp('public/images/ico/ip.png');
 const broImg = sharp('public/images/ico/bro.png');
 const localImg = sharp('public/images/ico/local.png');
-const tipImg = sharp('public/images/ico/tip.png');
+//const tipImg = sharp('public/images/ico/tip.png');
 const systemImg = sharp('public/images/ico/system.png');
 
 const mergeImages = async (weatherInfo, IP, os, browser) => {
@@ -24,7 +24,6 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
     const weatherIcons = sharp(`public/images/${weatherImgUrl}`);
     // 获取图片的信息
     const {width: bgWidth, height: bgHeight} = await bgImage.metadata(); // 获取背景图宽高 用于定义画布宽高
-    const {width: image2Width, height: image2Height} = await ipImg.metadata();
     // 创建一个空白的 Canvas
     const canvas = sharp({
         create: {
@@ -73,26 +72,26 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
         ...fontConfig,
     };
     const osText = {
-        text: `<span foreground="${color}" size="48">${os}</span>`,
+        text: `<span color="${color}" size="48">${os}</span>`,
         rgba: true,
         width: 110,
         height: 16,
         ...fontConfig,
     };
     const browserText = {
-        text: `<span foreground="${color}" size="48">${browser}</span>`,
+        text: `<span color="${color}" size="48">${browser}</span>`,
         rgba: true,
         width: 110,
         height: 16,
         ...fontConfig,
     };
-    const tipText = {
-        text: `<span  size="20" color="${color}" >${weatherInfo.tips}</span>`,
-        rgba: true,
-        width: 260,
-        height: 60,
-        ...fontConfig,
-    };
+    // const tipText = {
+    //     text: `<span  size="20" color="${color}" >${weatherInfo.tips}</span>`,
+    //     rgba: true,
+    //     width: 260,
+    //     height: 60,
+    //     ...fontConfig,
+    // };
     const weatherText = {
         text: `<span foreground="${color}" size="60">${weatherInfo.weather}</span>`,
         rgba: true,

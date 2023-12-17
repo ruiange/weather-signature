@@ -7,9 +7,11 @@ const app = express();
 
 app.use((req, res, next) => {
     const clientIP = req.headers['x-forwarded-for'] || req.ip || 'Unknown';
-    req.clientIP = clientIP;
+    // 使用模板字符串来提高可读性
+    req.clientIP = `${clientIP} (Detected by middleware)`;
     next();
 });
+
 
 app.use('/images', express.static('output'));
 
