@@ -100,31 +100,37 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
         ...fontConfig,
     };
     // 使用数组提供多个图层
-    canvas.composite([
-        {input: await bgImage.toBuffer(), left: 0, top: 0},
-        {input: await weatherIcons.toBuffer(), left: 40, top: 50},
-        {input: {text: firstLine}, left: 140, top: 80},
-        {input: {text: secondLine}, left: 140, top: 105},
-        {input: {text: thirdLine}, left: 140, top: 123},
-        {input: await ipImg.toBuffer(), left: 140, top: 170},
-        {input: {text: ipText}, left: 160, top: 173},
-        {input: await broImg.toBuffer(), left: 280, top: 170},
-        {input: {text: browserText}, left: 300, top: 173},
-        {input: await localImg.toBuffer(), left: 140, top: 190},
-        {input: {text: localText}, left: 160, top: 193},
-        {input: await systemImg.toBuffer(), left: 280, top: 190},
-        {input: {text: osText}, left: 300, top: 193},
-        {input: {text: weatherText}, left: 65, top: 132},
-        // {input: await tipImg.toBuffer(), left: 140, top: 210},
-        // {input: {text: tipText}, left: 160, top: 212},
-    ]);
-    // 生成唯一的文件名
-    const outputFileName = `${uuidv4()}.png`;
-    // 输出合成后的图片
-    await canvas.toFile(`output/${outputFileName}`);
-    return new Promise((resolve, reject) => {
-        resolve(outputFileName);
-    });
+
+
+    try{
+        canvas.composite([
+            {input: await bgImage.toBuffer(), left: 0, top: 0},
+            {input: await weatherIcons.toBuffer(), left: 40, top: 50},
+            {input: {text: firstLine}, left: 140, top: 80},
+            {input: {text: secondLine}, left: 140, top: 105},
+            {input: {text: thirdLine}, left: 140, top: 123},
+            {input: await ipImg.toBuffer(), left: 140, top: 170},
+            {input: {text: ipText}, left: 160, top: 173},
+            {input: await broImg.toBuffer(), left: 280, top: 170},
+            {input: {text: browserText}, left: 300, top: 173},
+            {input: await localImg.toBuffer(), left: 140, top: 190},
+            {input: {text: localText}, left: 160, top: 193},
+            {input: await systemImg.toBuffer(), left: 280, top: 190},
+            {input: {text: osText}, left: 300, top: 193},
+            {input: {text: weatherText}, left: 65, top: 132},
+            // {input: await tipImg.toBuffer(), left: 140, top: 210},
+            // {input: {text: tipText}, left: 160, top: 212},
+        ]);
+        // 生成唯一的文件名
+        const outputFileName = `${uuidv4()}.png`;
+        // 输出合成后的图片
+        await canvas.toFile(`output/${outputFileName}`);
+        return new Promise((resolve) => {
+            resolve(outputFileName);
+        });
+    }catch (e) {
+        throw e;
+    }
 };
 
 const getWeatherData = async ({city, ip, os, browser}) => {
@@ -142,10 +148,15 @@ const getWeatherData = async ({city, ip, os, browser}) => {
     }
     try {
         const imageUrl = await mergeImages(data.result, ip, os, browser);
-        return imageUrl;
-
+        return {
+            code:2000,
+            imageUrl,
+        };
     } catch (error) {
-        // 可以根据需要进行错误处理
+        console.log(error);
+        return {
+            code: 5000,
+        };
         throw error;
     }
 };

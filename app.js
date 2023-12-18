@@ -1,5 +1,5 @@
 const express = require('express');
-const { getWeatherData } = require('./src/generate');
+const {getWeatherData} = require('./src/generate');
 const path = require('path');
 const UAParser = require('ua-parser-js');
 
@@ -17,7 +17,7 @@ app.use('/images', express.static('output'));
 
 app.get('/', async (req, res) => {
     const clientIP = req.clientIP || 'Unknown';
-    const { query, protocol } = req;
+    const {query, protocol} = req;
     const ip = clientIP.replace(/[^0-9.]/g, '');
     const userAgent = req.get('User-Agent') || '';
     const parser = new UAParser(userAgent);
@@ -27,14 +27,20 @@ app.get('/', async (req, res) => {
         os: `${parser.getOS().name} ${parser.getOS().version}` || 'unknown',
         browser: `${parser.getBrowser().name}[${parser.getBrowser().version}]` || 'unknown',
     };
-    const imageName = await getWeatherData(queryParameters);
-    const imagePath = path.join(__dirname, 'output', imageName);
-    const currentDomain = req.get('host');
-    const imgUrl = `${protocol}://${currentDomain}/images/${imageName}`;
-    if (query.type === 'json') {
-        res.json({ imgUrl });
-    } else {
-        res.sendFile(imagePath);
+    const generatedData = await getWeatherData(queryParameters);
+    let imageName = ''
+    if (generatedData.code === 2000) {
+        imageName = generatedData.imageUrl
+        const imagePath = path.join(__dirname, 'output', imageName);
+        const currentDomain = req.get('host');
+        const imgUrl = `${protocol}://${currentDomain}/images/${imageName}`;
+        if (query.type === 'json') {
+            res.json({imgUrl});
+        } else {
+            res.sendFile(imagePath);
+        }
+    }else{
+        res.json({msg:'生成失败'})
     }
 });
 
