@@ -53,7 +53,7 @@ axios.get('http://localhost:4000?type=json')
 ### 部署
 [宝塔部署](doc/bt.md)
 
-[vercel部署](doc/vercel.md)
+[//]: # ([vercel部署]&#40;doc/vercel.md&#41;)
 
 
 ### 其他
