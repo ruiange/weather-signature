@@ -129,6 +129,7 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
             resolve(outputFileName);
         });
     }catch (e) {
+        console.log(e);
         throw e;
     }
 };

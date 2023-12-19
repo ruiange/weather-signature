@@ -14,7 +14,7 @@
   "dependencies": {
     "axios": "^1.6.2",
     "express": "^4.18.2",
-    "sharp": "^0.33.0",
+    "sharp": "^0.33.1",
     "ua-parser-js": "^2.0.0-alpha.3",
     "uuid": "^9.0.1"
   }
