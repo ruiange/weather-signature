@@ -51,10 +51,10 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
     };
     // 第三行文字 更新时间
     const thirdLine = {
-        text: `<span foreground="${color}">更新时间：${new Date().toLocaleString()}</span>`,
+        text: `<span foreground="${color}" size="55">更新时间：${new Date().toLocaleString()}</span>`,
         rgba: true,
-        width: 220,
-        height: 30,
+        width: 240,
+        height: 20,
         ...fontConfig,
     };
     const ipText = {
@@ -146,6 +146,11 @@ const getWeatherData = async ({city, ip, os, browser}) => {
     });
     if(ip==='1'){
         ip='127.0.0.1'
+    }
+    if(data.code!==200){
+        return {
+            code: 5000,
+        };
     }
     try {
         const imageUrl = await mergeImages(data.result, ip, os, browser);
