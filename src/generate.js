@@ -102,7 +102,7 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
     // 使用数组提供多个图层
 
 
-    try{
+    try {
         canvas.composite([
             {input: await bgImage.toBuffer(), left: 0, top: 0},
             {input: await weatherIcons.toBuffer(), left: 40, top: 50},
@@ -128,7 +128,7 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
         return new Promise((resolve) => {
             resolve(outputFileName);
         });
-    }catch (e) {
+    } catch (e) {
         console.log(e);
         throw e;
     }
@@ -144,10 +144,10 @@ const getWeatherData = async ({city, ip, os, browser}) => {
             type: 1,
         },
     });
-    if(ip==='1'){
-        ip='127.0.0.1'
+    if (ip === '1') {
+        ip = '127.0.0.1'
     }
-    if(data.code!==200){
+    if (data.code !== 200) {
         return {
             code: 5000,
         };
@@ -155,7 +155,7 @@ const getWeatherData = async ({city, ip, os, browser}) => {
     try {
         const imageUrl = await mergeImages(data.result, ip, os, browser);
         return {
-            code:2000,
+            code: 2000,
             imageUrl,
         };
     } catch (error) {
@@ -169,29 +169,24 @@ const getWeatherData = async ({city, ip, os, browser}) => {
 
 //图标名称转换
 const iconNameConversion = (icon) => {
-    if (icon.includes('xue')) {
-        return 'xue.png'
-    }
-    if (icon.includes('yu')) {
-        return 'yu.png'
-    }
-    if (icon.includes('wu' || 'mai')) {
-        return 'wu.png'
-    }
-    if (icon.includes('sha')) {
-        return 'sha.png'
-    }
-    if (icon.includes('yin')) {
-        return 'yin.png'
-    }
-    if (icon.includes('duoyun')) {
-        return 'duoyun.png'
-    }
-    if (icon.includes('qing')) {
-        return 'qing.png'
-    }
-    return 'unknow.png'
-}
+    const iconNameMap = {
+        'xue': 'xue.png',
+        'yu': 'yu.png',
+        'wu': 'wu.png',
+        'mai': 'wu.png', // 'mai' shares the same image with 'wu'
+        'sha': 'sha.png',
+        'yin': 'yin.png',
+        'duoyun': 'duoyun.png',
+        'qing': 'qing.png'
+    };
+
+    const iconKey = Object.keys(iconNameMap)
+        .find(key => icon.includes(key));
+
+    return iconKey ? iconNameMap[iconKey] : 'unknow.png';
+};
+
+
 
 
 // 导出函数
