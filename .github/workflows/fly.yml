@@ -1,0 +1,19 @@
+name: Fly Deploy
+on:
+  push:
+    branches:
+      - main  # 或者是您的主分支名称，如 master
+
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      
+      - name: Deploy to fly.io
+        run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }} 
