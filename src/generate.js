@@ -150,6 +150,8 @@ const getWeatherData = async ({city, ip, os, browser}) => {
     if (data.code !== 200) {
         return {
             code: 5000,
+            message: '天气查询失败',
+            data: data
         };
     }
     try {
@@ -162,6 +164,7 @@ const getWeatherData = async ({city, ip, os, browser}) => {
         console.log(error);
         return {
             code: 5000,
+            message: error,
         };
         throw error;
     }
