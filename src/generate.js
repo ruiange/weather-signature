@@ -151,7 +151,11 @@ const getWeatherData = async ({city, ip, os, browser}) => {
         return {
             code: 5000,
             message: '天气查询失败',
-            data: data
+            data: data,
+            ip,
+            os,
+            browser,
+            city
         };
     }
     try {
