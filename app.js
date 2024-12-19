@@ -41,7 +41,7 @@ app.get('/', async (req, res) => {
             res.sendFile(imagePath);
         }
     } else {
-        res.json({msg: '生成失败'})
+        res.json({msg: '生成失败',data:generatedData})
     }
 });
 
