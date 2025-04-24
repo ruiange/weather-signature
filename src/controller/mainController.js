@@ -21,6 +21,11 @@ export const getWeatherImg = async (req, res) => {
         return
     }
     if(isJson){
+        if(process.env.IS_VERCEL === 'true'){
+            res.json({
+                url: imgData.imageUrl,
+            })
+        }
         res.json({
             url: `${protocol}://${req.headers.host}/images/${imgData.imageUrl}`,
         })
