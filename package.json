@@ -2,10 +2,10 @@
   "name": "weather-signature",
   "version": "1.0.0",
   "description": "天气签名图",
-  "main": "app.ts",
+  "main": "app.js",
   "scripts": {
-    "start": "node app",
-    "dev": "nodemon app",
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "card": "node src/generate"
   },
   "keywords": [],
