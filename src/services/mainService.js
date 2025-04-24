@@ -142,10 +142,12 @@ const mergeImages = async (weatherInfo, IP, os, browser, isJson) => {
         const imageBuffer = await canvas.png().toBuffer();
 
         if (isJson) {
-            await canvas.toFile(`output/${outputFileName}`);
+
             if (process.env.IS_VERCEL === 'true') {
                 const blobImgUrl = await vercelBlobUpload(imageBuffer, outputFileName);
                 return {imageUrl: blobImgUrl, imageBuffer};
+            }else{
+                await canvas.toFile(`output/${outputFileName}`);
             }
             return {imageUrl: outputFileName, imageBuffer: ''};
         } else {
