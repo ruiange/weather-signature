@@ -14,6 +14,11 @@ export const getWeatherImg = async (req, res) => {
     console.log(clientIP)
     const isJson = type === 'json';
     const imgData = await getWeatherData({city, ip: clientIP, os, browser},isJson)
+    console.log(imgData)
+    if(imgData.code !== 2000){
+        res.json(imgData)
+        return
+    }
     if(isJson){
         res.json({
             url: `${protocol}://${req.headers.host}/images/${imgData.imageUrl}`,
