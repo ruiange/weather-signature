@@ -2,21 +2,20 @@ const sharp = require('sharp');
 const {v4: uuidv4} = require('uuid');
 const axios = require('axios');
 const config = require('../config.json');
+const path = require('path');
 const {vercelBlobUpload} = require("./utils/vercelBlobUtil");
 const color = '#0c3952'; // 文字颜色
 const fontConfig = {
-    fontfile: 'public/font/msyh.ttf',
+    fontfile: path.join(__dirname, '../public/font/msyh.ttf'),
     font: '汉仪帅线体W',
 };
 
-// 读取要合成的图片
-const bgImage = sharp('public/images/bg.png');
-
-const ipImg = sharp('public/images/ico/ip.png');
-const broImg = sharp('public/images/ico/bro.png');
-const localImg = sharp('public/images/ico/local.png');
-//const tipImg = sharp('public/images/ico/tip.png');
-const systemImg = sharp('public/images/ico/system.png');
+const bgImage = sharp(path.join(__dirname, '../public/images/bg.png'));
+const ipImg = sharp(path.join(__dirname, '../public/images/ico/ip.png'));
+const broImg = sharp(path.join(__dirname, '../public/images/ico/bro.png'));
+const localImg = sharp(path.join(__dirname, '../public/images/ico/local.png'));
+const systemImg = sharp(path.join(__dirname, '../public/images/ico/system.png'));
+// const tipImg = sharp(path.join(__dirname, '../public/images/ico/tip.png'));
 /**
  * mergeImages 合并图片
  * @param weatherInfo
