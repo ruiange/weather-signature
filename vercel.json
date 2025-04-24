@@ -11,7 +11,5 @@
       "src": "/(.*)",
       "dest": "src/app.js"
     }
-  ],
-  "buildCommand": "npm run apidoc",
-  "devCommand": "npm run dev"
+  ]
 }
