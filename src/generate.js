@@ -2,6 +2,7 @@ const sharp = require('sharp');
 const {v4: uuidv4} = require('uuid');
 const axios = require('axios');
 const config = require('../config.json');
+const {vercelBlobUpload} = require("./utils/vercelBlobUtil");
 const color = '#0c3952'; // 文字颜色
 const fontConfig = {
     fontfile: 'public/font/msyh.ttf',
@@ -16,7 +17,14 @@ const broImg = sharp('public/images/ico/bro.png');
 const localImg = sharp('public/images/ico/local.png');
 //const tipImg = sharp('public/images/ico/tip.png');
 const systemImg = sharp('public/images/ico/system.png');
-
+/**
+ * mergeImages 合并图片
+ * @param weatherInfo
+ * @param IP
+ * @param os
+ * @param browser
+ * @returns {Promise<unknown>}
+ */
 const mergeImages = async (weatherInfo, IP, os, browser) => {
 
     const weatherImgUrl = iconNameConversion(weatherInfo.weatherimg)
@@ -121,12 +129,30 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
             // {input: await tipImg.toBuffer(), left: 140, top: 210},
             // {input: {text: tipText}, left: 160, top: 212},
         ]);
-        // 生成唯一的文件名
+
+
+        const isVercel = process.env.IS_VERCEL === 'true';
+
+
+
         const outputFileName = `${uuidv4()}.png`;
+        if(isVercel){
+            const imageBuffer = await canvas.png().toBuffer();
+
+
+            const blobImgUrl = await vercelBlobUpload(imageBuffer, outputFileName)
+            return new Promise((resolve) => {
+                resolve({ imageUrl: blobImgUrl, imageBuffer});
+            });
+        }
+
+
+        // 生成唯一的文件名
+
         // 输出合成后的图片
         await canvas.toFile(`output/${outputFileName}`);
         return new Promise((resolve) => {
-            resolve(outputFileName);
+            resolve({ imageUrl: outputFileName, imageBuffer:''});
         });
     } catch (e) {
         console.log(e);
@@ -159,10 +185,12 @@ const getWeatherData = async ({city, ip, os, browser}) => {
         };
     }
     try {
-        const imageUrl = await mergeImages(data.result, ip, os, browser);
+        const { imageUrl,imageBuffer } = await mergeImages(data.result, ip, os, browser);
+
         return {
             code: 2000,
             imageUrl,
+            imageBuffer
         };
     } catch (error) {
         console.log(error);
