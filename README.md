@@ -5,7 +5,7 @@
 一个基于express的天气签名图生成服务，可以让你在网站上显示自己的IP，操作系统，浏览器，当地天气。可以让你在网站上远程调用天气签名图，比如在网站侧栏/弹窗提醒等等...
 ##### img标签直接调用
 ```html
-<img src="http://localhost:4000" alt="" width="428" height="250" />
+<img src="https://tq.ruiange.com/" alt="" width="428" height="250" />
 ```
 #### 演示效果
 
@@ -17,7 +17,7 @@
 #### 接口形式返回imgUrl
 
 ```html
-<img src="http://localhost:4000?type=img" alt="" width="428" height="250" />
+<img src="https://tq.ruiange.com/?type=img" alt="" width="428" height="250" />
 ```
 
 ##### 接口形式返回imgUrl
@@ -25,7 +25,7 @@
 
 ```js
 //发起请求
-axios.get('http://localhost:4000?type=json')
+axios.get('https://tq.ruiange.com/?type=json')
 ```
 接口返回
 ```json
