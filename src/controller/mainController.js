@@ -5,6 +5,7 @@ export const getWeatherImg = async (req, res) => {
     const {query, protocol} = req;
     const {type, city} = query;
     const clientIP = req.clientIP || 'Unknown';
+    const ip = clientIP.replace(/[^0-9.]/g, '');
     const userAgent = req.get('User-Agent') || '';
     const parser = new UAParser(userAgent);
     const result = parser.getResult();
@@ -13,7 +14,7 @@ export const getWeatherImg = async (req, res) => {
     console.log(os, browser);
     console.log(clientIP)
     const isJson = type === 'json';
-    const imgData = await getWeatherData({city, ip: clientIP, os, browser},isJson)
+    const imgData = await getWeatherData({city, ip, os, browser},isJson)
     console.log(imgData)
     if(imgData.code !== 2000){
         res.json(imgData)

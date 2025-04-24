@@ -34,12 +34,12 @@ const systemImg = sharp(path.join(iconsPath, 'system.png'));
 const color = '#0c3952';
 
 
-const mergeImages = async (weatherInfo, IP, os, browser,isJson) => {
+const mergeImages = async (weatherInfo, IP, os, browser, isJson) => {
     const weatherImgUrl = iconNameConversion(weatherInfo.weatherimg);
     const weatherIcons = sharp(path.join(imagesPath, weatherImgUrl));
 
 
-   // 获取图片的信息
+    // 获取图片的信息
     const {width: bgWidth, height: bgHeight} = await bgImage.metadata(); // 获取背景图宽高 用于定义画布宽高
     // 创建一个空白的 Canvas
     const canvas = sharp({
@@ -141,20 +141,16 @@ const mergeImages = async (weatherInfo, IP, os, browser,isJson) => {
         const outputFileName = `${uuidv4()}.png`;
         const imageBuffer = await canvas.png().toBuffer();
 
-        if(isJson){
+        if (isJson) {
             await canvas.toFile(`output/${outputFileName}`);
             if (process.env.IS_VERCEL === 'true') {
                 const blobImgUrl = await vercelBlobUpload(imageBuffer, outputFileName);
                 return {imageUrl: blobImgUrl, imageBuffer};
             }
             return {imageUrl: outputFileName, imageBuffer: ''};
-        }else{
-            return {imageUrl:'', imageBuffer};
+        } else {
+            return {imageUrl: '', imageBuffer};
         }
-
-
-
-
 
 
     } catch (e) {
@@ -177,10 +173,10 @@ const iconNameConversion = (icon) => {
     return iconKey ? iconNameMap[iconKey] : 'unknow.png';
 };
 
-export const getWeatherData = async ({city, ip, os, browser},isJson=false) => {
+export const getWeatherData = async ({city, ip, os, browser}, isJson = false) => {
     console.log('🚀 ~ getWeatherData ~', {city, ip, os, browser})
     const url = 'https://apis.tianapi.com/tianqi/index';
-    const queryCity = city || (ip && (ip !== '1' || !ip.includes('::1')) ? ip : '');
+    const queryCity = city || (ip && ip !== '1' ? ip : '');
     console.log('🚀 ~ getWeatherData ~', {url, queryCity})
     const {data} = await axios.get(url, {
         params: {
