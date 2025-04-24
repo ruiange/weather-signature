@@ -28,7 +28,7 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
 
     const weatherImgUrl = iconNameConversion(weatherInfo.weatherimg)
 
-    const weatherIcons = sharp(`public/images/${weatherImgUrl}`);
+    const weatherIcons = sharp(path.join(__dirname,`public/images/${weatherImgUrl}`));
     // 获取图片的信息
     const {width: bgWidth, height: bgHeight} = await bgImage.metadata(); // 获取背景图宽高 用于定义画布宽高
     // 创建一个空白的 Canvas
