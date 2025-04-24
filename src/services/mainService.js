@@ -1,35 +1,45 @@
-const sharp = require('sharp');
-const {v4: uuidv4} = require('uuid');
-const axios = require('axios');
-const config = require('../config.json');
-const path = require('path');
-const {vercelBlobUpload} = require("./utils/vercelBlobUtil");
-const color = '#0c3952'; // 文字颜色
+import sharp from 'sharp';
+import {v4 as uuidv4} from 'uuid';
+import axios from 'axios';
+import path from 'path';
+import {fileURLToPath} from 'url';
+import vercelBlobUpload from "../utils/vercelBlobUtil.js";
+import fs from "fs";
+
+// 模拟 __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// 统一路径常量
+const publicPath = path.join(__dirname, '..', '..', 'public');
+const imagesPath = path.join(publicPath, 'images');
+const iconsPath = path.join(imagesPath, 'ico');
+const fontPath = path.join(publicPath, 'font', 'msyh.ttf');
+console.log('📁 是否存在：', fs.existsSync(publicPath));
+// 字体配置
 const fontConfig = {
-    fontfile: path.join(__dirname, '../public/font/msyh.ttf'),
+    fontfile: fontPath,
     font: '汉仪帅线体W',
 };
 
-const bgImage = sharp(path.join(__dirname, '../public/images/bg.png'));
-const ipImg = sharp(path.join(__dirname, '../public/images/ico/ip.png'));
-const broImg = sharp(path.join(__dirname, '../public/images/ico/bro.png'));
-const localImg = sharp(path.join(__dirname, '../public/images/ico/local.png'));
-const systemImg = sharp(path.join(__dirname, '../public/images/ico/system.png'));
-// const tipImg = sharp(path.join(__dirname, '../public/images/ico/tip.png'));
-/**
- * mergeImages 合并图片
- * @param weatherInfo
- * @param IP
- * @param os
- * @param browser
- * @returns {Promise<unknown>}
- */
-const mergeImages = async (weatherInfo, IP, os, browser) => {
+// 图片资源
+const bgImage = sharp(path.join(imagesPath, 'bg.png'));
+const ipImg = sharp(path.join(iconsPath, 'ip.png'));
+const broImg = sharp(path.join(iconsPath, 'bro.png'));
+const localImg = sharp(path.join(iconsPath, 'local.png'));
+const systemImg = sharp(path.join(iconsPath, 'system.png'));
+// const tipImg = sharp(path.join(iconsPath, 'tip.png'));
 
-    const weatherImgUrl = iconNameConversion(weatherInfo.weatherimg)
 
-    const weatherIcons = sharp(path.join(__dirname,`../public/images/${weatherImgUrl}`));
-    // 获取图片的信息
+const color = '#0c3952';
+
+
+const mergeImages = async (weatherInfo, IP, os, browser,isJson) => {
+    const weatherImgUrl = iconNameConversion(weatherInfo.weatherimg);
+    const weatherIcons = sharp(path.join(imagesPath, weatherImgUrl));
+
+
+   // 获取图片的信息
     const {width: bgWidth, height: bgHeight} = await bgImage.metadata(); // 获取背景图宽高 用于定义画布宽高
     // 创建一个空白的 Canvas
     const canvas = sharp({
@@ -106,7 +116,6 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
         height: 16,
         ...fontConfig,
     };
-    // 使用数组提供多个图层
 
 
     try {
@@ -129,49 +138,59 @@ const mergeImages = async (weatherInfo, IP, os, browser) => {
             // {input: {text: tipText}, left: 160, top: 212},
         ]);
 
-
-        const isVercel = process.env.IS_VERCEL === 'true';
-
-
-
         const outputFileName = `${uuidv4()}.png`;
-        if(isVercel){
-            const imageBuffer = await canvas.png().toBuffer();
+        const imageBuffer = await canvas.png().toBuffer();
 
-
-            const blobImgUrl = await vercelBlobUpload(imageBuffer, outputFileName)
-            return new Promise((resolve) => {
-                resolve({ imageUrl: blobImgUrl, imageBuffer});
-            });
+        if(isJson){
+            await canvas.toFile(`output/${outputFileName}`);
+            if (process.env.IS_VERCEL === 'true') {
+                const blobImgUrl = await vercelBlobUpload(imageBuffer, outputFileName);
+                return {imageUrl: blobImgUrl, imageBuffer};
+            }
+            return {imageUrl: outputFileName, imageBuffer: ''};
+        }else{
+            return {imageUrl:'', imageBuffer};
         }
 
 
-        // 生成唯一的文件名
 
-        // 输出合成后的图片
-        await canvas.toFile(`output/${outputFileName}`);
-        return new Promise((resolve) => {
-            resolve({ imageUrl: outputFileName, imageBuffer:''});
-        });
+
+
+
     } catch (e) {
-        console.log(e);
         throw e;
     }
 };
 
-const getWeatherData = async ({city, ip, os, browser}) => {
+const iconNameConversion = (icon) => {
+    const iconNameMap = {
+        xue: 'xue.png',
+        yu: 'yu.png',
+        wu: 'wu.png',
+        mai: 'wu.png',
+        sha: 'sha.png',
+        yin: 'yin.png',
+        duoyun: 'duoyun.png',
+        qing: 'qing.png'
+    };
+    const iconKey = Object.keys(iconNameMap).find(key => icon.includes(key));
+    return iconKey ? iconNameMap[iconKey] : 'unknow.png';
+};
+
+export const getWeatherData = async ({city, ip, os, browser},isJson=false) => {
+    console.log('🚀 ~ getWeatherData ~', {city, ip, os, browser})
     const url = 'https://apis.tianapi.com/tianqi/index';
-    const queryCity = city || (ip && ip !== '1' ? ip : '');
+    const queryCity = city || (ip && (ip !== '1' || !ip.includes('::1')) ? ip : '');
+    console.log('🚀 ~ getWeatherData ~', {url, queryCity})
     const {data} = await axios.get(url, {
         params: {
-            key: config.tianxingKey,
+            key: process.env.TIAN_XING_KEY,
             city: queryCity || '北京',
             type: 1,
         },
     });
-    if (ip === '1') {
-        ip = '127.0.0.1'
-    }
+    if (ip === '1' || !ip) ip = '127.0.0.1';
+
     if (data.code !== 200) {
         return {
             code: 5000,
@@ -183,47 +202,15 @@ const getWeatherData = async ({city, ip, os, browser}) => {
             city
         };
     }
-    try {
-        const { imageUrl,imageBuffer } = await mergeImages(data.result, ip, os, browser);
 
-        return {
-            code: 2000,
-            imageUrl,
-            imageBuffer
-        };
+
+    try {
+        const {imageUrl, imageBuffer} = await mergeImages(data.result, ip, os, browser, isJson);
+        return {code: 2000, imageUrl, imageBuffer};
     } catch (error) {
-        console.log(error);
-        return {
-            code: 5000,
-            message: error,
-        };
-        throw error;
+        console.error(error.message);
+        return {code: 5000, message: error.message};
     }
 };
 
-//图标名称转换
-const iconNameConversion = (icon) => {
-    const iconNameMap = {
-        'xue': 'xue.png',
-        'yu': 'yu.png',
-        'wu': 'wu.png',
-        'mai': 'wu.png', // 'mai' shares the same image with 'wu'
-        'sha': 'sha.png',
-        'yin': 'yin.png',
-        'duoyun': 'duoyun.png',
-        'qing': 'qing.png'
-    };
 
-    const iconKey = Object.keys(iconNameMap)
-        .find(key => icon.includes(key));
-
-    return iconKey ? iconNameMap[iconKey] : 'unknow.png';
-};
-
-
-
-
-// 导出函数
-module.exports = {
-    getWeatherData,
-};

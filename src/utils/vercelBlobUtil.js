@@ -1,4 +1,4 @@
-const { put } = require('@vercel/blob');
+import { put } from '@vercel/blob';
 const vercelBlobUpload = async (buffer,originalname) => {
     const { url, downloadUrl, pathname, contentType, contentDisposition } = await put(
         originalname,
@@ -11,6 +11,4 @@ const vercelBlobUpload = async (buffer,originalname) => {
     return url;
 };
 
-module.exports = {
-    vercelBlobUpload
-}
+export default vercelBlobUpload;

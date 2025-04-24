@@ -1,0 +1,25 @@
+import {UAParser} from "ua-parser-js";
+import {getWeatherData} from "../services/mainService.js";
+
+export const getWeatherImg = async (req, res) => {
+    const {query, protocol} = req;
+    const {type, city} = query;
+    const clientIP = req.clientIP || 'Unknown';
+    const userAgent = req.get('User-Agent') || '';
+    const parser = new UAParser(userAgent);
+    const result = parser.getResult();
+    const os = result.os.name ? result.os.name + ' ' + result.os.version : 'Servers';
+    const browser = result.browser.name ? result.browser.name + ' ' + result.browser.version : 'WeChat';
+    console.log(os, browser);
+    console.log(clientIP)
+    const isJson = type === 'json';
+    const imgData = await getWeatherData({city, ip: clientIP, os, browser},isJson)
+    if(isJson){
+        res.json({
+            url: `${protocol}://${req.headers.host}/images/${imgData.imageUrl}`,
+        })
+    }else{
+        res.set('Content-Type', 'image/png');
+        res.end(imgData.imageBuffer)
+    }
+}
