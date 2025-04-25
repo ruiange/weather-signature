@@ -33,7 +33,7 @@ axios.get('https://tq.ruiange.com/?type=json')
 接口返回
 ```json
 {
-  "imgUrl": "xxx.xxx.png"
+  "url": "xxx.xxx.png"
 }
 ```
 
