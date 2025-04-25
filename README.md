@@ -3,6 +3,9 @@
 #### 简介
 
 一个基于express的天气签名图生成服务，可以让你在网站上显示自己的IP，操作系统，浏览器，当地天气。可以让你在网站上远程调用天气签名图，比如在网站侧栏/弹窗提醒等等...
+
+支持vps部署 vercel docker部署;(vercel部署需要配置vercel Blob)
+
 ##### img标签直接调用
 ```html
 <img src="https://tq.ruiange.com/" alt="" width="428" height="250" />
@@ -45,7 +48,7 @@ axios.get('https://tq.ruiange.com/?type=json')
 
 #### 注意事项
 
-- 请在config.json中配置你的api key信息（天行api每天可以免费调用1000次）
+- 请在`.env`中配置你的[api key](https://www.tianapi.com/apiview/72)（天行api每天可以免费调用1000次）
 - [天气预报接口主要天气状态和图标文件名](https://www.tianapi.com/article/164)
 
 
