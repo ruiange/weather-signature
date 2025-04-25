@@ -9,7 +9,9 @@ dotenv.config();
 const app = express();
 app.use('/images', express.static('output'));
 
+app.use(limiter)
 app.use(ipMiddleware)
+
 const DATABASE_URL = process.env.DATABASE_URL;
 if(DATABASE_URL){
     app.use(requestLogMiddleware);

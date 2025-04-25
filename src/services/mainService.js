@@ -68,7 +68,7 @@ const mergeImages = async (weatherInfo, IP, os, browser, isJson) => {
     };
     // 第三行文字 更新时间
     const thirdLine = {
-        text: `<span foreground="${color}" size="55">更新时间：${new Date().toLocaleString()}</span>`,
+        text: `<span foreground="${color}" size="55">更新时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</span>`,
         rgba: true,
         width: 240,
         height: 20,
