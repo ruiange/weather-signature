@@ -12,6 +12,8 @@ app.use(mainRouter);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`启动成功-${new Date().toLocaleString()}`);
-    console.log(`http://localhost:${PORT}`);
-    console.log(`http://localhost:${PORT}?city=北京`)
+    console.log(`请求示例: http://localhost:${PORT}`);
+    console.log(`请求示例：http://localhost:${PORT}?city=%E5%8C%97%E4%BA%AC`)
+    console.log(`请求示例：http://localhost:${PORT}?json=type`)
+    console.log(`请求示例：http://localhost:${PORT}?city=%E5%8C%97%E4%BA%AC&&json=type`)
 });
