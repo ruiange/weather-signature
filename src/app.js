@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import mainRouter from "./routes/mainRouter.js";
 import ipMiddleware from "./middleware/ipMiddleware.js";
 import requestLogMiddleware from "./middleware/requestLogMiddleware.js";
+import  limiter  from './middleware/limiterMiddleware.js';
 dotenv.config();
 
 const app = express();
