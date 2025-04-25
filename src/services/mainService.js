@@ -176,10 +176,9 @@ const iconNameConversion = (icon) => {
 };
 
 export const getWeatherData = async ({city, ip, os, browser}, isJson = false) => {
-    console.log('🚀 ~ getWeatherData ~', {city, ip, os, browser})
+
     const url = 'https://apis.tianapi.com/tianqi/index';
     const queryCity = city || (ip && ip !== '1' ? ip : '');
-    console.log('🚀 ~ getWeatherData ~', {url, queryCity})
     const {data} = await axios.get(url, {
         params: {
             key: process.env.TIAN_XING_KEY,
@@ -206,7 +205,6 @@ export const getWeatherData = async ({city, ip, os, browser}, isJson = false) =>
         const {imageUrl, imageBuffer} = await mergeImages(data.result, ip, os, browser, isJson);
         return {code: 2000, imageUrl, imageBuffer};
     } catch (error) {
-        console.error(error.message);
         return {code: 5000, message: error.message};
     }
 };

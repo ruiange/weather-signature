@@ -7,19 +7,23 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "card": "node src/generate"
+    "card": "node src/generate",
+    "init-db": "node src/scripts/init-db.js"
   },
   "keywords": [],
   "author": "ruiange",
   "license": "ISC",
   "dependencies": {
+    "@neondatabase/serverless": "^1.0.0",
+    "@vercel/blob": "^1.0.0",
     "axios": "1.8.2",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.3.1",
+    "drizzle-orm": "^0.43.0",
     "express": "5.0.0",
     "nodemon": "^3.1.9",
     "sharp": "^0.33.1",
     "ua-parser-js": "^2.0.3",
-    "uuid": "^9.0.1",
-    "dotenv": "^16.3.1",
-    "@vercel/blob": "^1.0.0"
+    "uuid": "^9.0.1"
   }
 }

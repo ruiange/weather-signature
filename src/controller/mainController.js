@@ -11,11 +11,10 @@ export const getWeatherImg = async (req, res) => {
     const result = parser.getResult();
     const os = result.os.name ? result.os.name + ' ' + result.os.version : 'Servers';
     const browser = result.browser.name ? result.browser.name + ' ' + result.browser.version : 'WeChat';
-    console.log(os, browser);
-    console.log(clientIP)
+
     const isJson = type === 'json';
     const imgData = await getWeatherData({city, ip, os, browser},isJson)
-    console.log(imgData)
+
     if(imgData.code !== 2000){
         res.json(imgData)
         return

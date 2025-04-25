@@ -3,11 +3,17 @@ import express from 'express';
 import dotenv from 'dotenv';
 import mainRouter from "./routes/mainRouter.js";
 import ipMiddleware from "./middleware/ipMiddleware.js";
+import requestLogMiddleware from "./middleware/requestLogMiddleware.js";
 dotenv.config();
 
 const app = express();
 app.use('/images', express.static('output'));
+
 app.use(ipMiddleware)
+const DATABASE_URL = process.env.DATABASE_URL;
+if(DATABASE_URL){
+    app.use(requestLogMiddleware);
+}
 app.use(mainRouter);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
