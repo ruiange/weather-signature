@@ -138,7 +138,7 @@ const mergeImages = async (weatherInfo, IP, os, browser, isJson) => {
             // {input: {text: tipText}, left: 160, top: 212},
         ]);
 
-        const outputFileName = `${uuidv4()}.png`;
+        const outputFileName = `weather/${uuidv4()}.png`;
         const imageBuffer = await canvas.png().toBuffer();
 
         if (isJson) {
