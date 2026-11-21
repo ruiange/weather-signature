@@ -1,212 +1,122 @@
-import sharp from 'sharp';
-import {v4 as uuidv4} from 'uuid';
 import axios from 'axios';
-import path from 'path';
-import {fileURLToPath} from 'url';
-import vercelBlobUpload from "../utils/vercelBlobUtil.js";
-import fs from "fs";
+import sharp from 'sharp';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { isIPv4 } from 'node:net';
+import { fileURLToPath } from 'node:url';
+import vercelBlobUpload from '../utils/vercelBlobUtil.js';
 
-// 模拟 __dirname
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// 统一路径常量
-const publicPath = path.join(__dirname, '..', '..', 'public');
-const imagesPath = path.join(publicPath, 'images');
-const iconsPath = path.join(imagesPath, 'ico');
-const fontPath = path.join(publicPath, 'font', 'msyh.ttf');
-console.log('📁 是否存在：', fs.existsSync(publicPath));
-// 字体配置
+const imagesPath = fileURLToPath(new URL('../../public/images/', import.meta.url));
+const defaultOutputDirectory = fileURLToPath(new URL('../../output/', import.meta.url));
 const fontConfig = {
-    fontfile: fontPath,
-    font: '汉仪帅线体W',
+    fontfile: fileURLToPath(new URL('../../public/font/msyh.ttf', import.meta.url)),
+    font: '汉仪帅线体W'
 };
-
-// 图片资源
-const bgImage = sharp(path.join(imagesPath, 'bg.png'));
-const ipImg = sharp(path.join(iconsPath, 'ip.png'));
-const broImg = sharp(path.join(iconsPath, 'bro.png'));
-const localImg = sharp(path.join(iconsPath, 'local.png'));
-const systemImg = sharp(path.join(iconsPath, 'system.png'));
-// const tipImg = sharp(path.join(iconsPath, 'tip.png'));
-
-
 const color = '#0c3952';
+const tianqiEndpoint = 'https://apis.tianapi.com/tianqi/index';
+const captions = { duoyun: 'duoyun.png', xue: 'xue.png', yu: 'yu.png', wu: 'wu.png', mai: 'wu.png',
+    sha: 'sha.png', yin: 'yin.png', qing: 'qing.png' };
+const assetCache = new Map();
+const dateFormat = new Intl.DateTimeFormat('zh-CN', {
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric', second: 'numeric', timeZone: 'Asia/Shanghai'
+});
 
+function imageAsset(filename) {
+    if (!assetCache.has(filename)) {
+        const pending = readFile(join(imagesPath, filename)).catch(error => {
+            assetCache.delete(filename);
+            throw error;
+        });
+        assetCache.set(filename, pending);
+    }
+    return assetCache.get(filename);
+}
 
-const mergeImages = async (weatherInfo, IP, os, browser, isJson) => {
-    const weatherImgUrl = iconNameConversion(weatherInfo.weatherimg);
-    const weatherIcons = sharp(path.join(imagesPath, weatherImgUrl));
+function weatherIcon(icon) {
+    const source = typeof icon === 'string' ? icon.toLowerCase() : '';
+    const matched = Object.keys(captions).find(key => source.includes(key));
+    return matched ? captions[matched] : 'unknow.png';
+}
 
+function escapePango(value) {
+    return String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
+    })[character]);
+}
 
-    // 获取图片的信息
-    const {width: bgWidth, height: bgHeight} = await bgImage.metadata(); // 获取背景图宽高 用于定义画布宽高
-    // 创建一个空白的 Canvas
-    const canvas = sharp({
-        create: {
-            width: bgWidth,
-            height: bgHeight,
-            channels: 4, // RGBA
-            background: {r: 255, g: 255, b: 255, alpha: 0}, // 设置背景为透明
-        },
-    });
-    // 第一行文字 温度 适度
-    const firstLine = {
-        text: `<span foreground="${color}">温度：${weatherInfo.real} 湿度: ${weatherInfo.humidity}%RH</span>`,
-        rgba: true,
-        width: 200,
-        height: 30,
-        ...fontConfig,
-    };
-    // 第二行文字 风向 风力
-    const secondLine = {
-        text: `<span foreground="${color}">风向：${weatherInfo.wind}${weatherInfo.windsc} 空气质量：${weatherInfo.quality}</span>`,
-        rgba: true,
-        width: 200,
-        height: 30,
-        ...fontConfig,
-    };
-    // 第三行文字 更新时间
-    const thirdLine = {
-        text: `<span foreground="${color}" size="55">更新时间：${new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' })}</span>`,
-        rgba: true,
-        width: 240,
-        height: 20,
-        ...fontConfig,
-    };
-    const ipText = {
-        text: `<span foreground="${color}" size="45">${IP}</span>`,
-        rgba: true,
-        width: 100,
-        height: 20,
-        ...fontConfig,
-    };
-    const localText = {
-        text: `<span foreground="${color}" size="48">${weatherInfo.province}-${weatherInfo.area}</span>`,
-        rgba: true,
-        width: 110,
-        height: 16,
-        ...fontConfig,
-    };
-    const osText = {
-        text: `<span color="${color}" size="48">${os}</span>`,
-        rgba: true,
-        width: 110,
-        height: 16,
-        ...fontConfig,
-    };
-    const browserText = {
-        text: `<span color="${color}" size="48">${browser}</span>`,
-        rgba: true,
-        width: 110,
-        height: 16,
-        ...fontConfig,
-    };
-    // const tipText = {
-    //     text: `<span  size="20" color="${color}" >${weatherInfo.tips}</span>`,
-    //     rgba: true,
-    //     width: 260,
-    //     height: 60,
-    //     ...fontConfig,
-    // };
-    const weatherText = {
-        text: `<span foreground="${color}" size="60">${weatherInfo.weather}</span>`,
-        rgba: true,
-        width: 110,
-        height: 16,
-        ...fontConfig,
-    };
+function overlayText(value, width, height, left, top, size) {
+    const style = size ? ` size="${size}"` : '';
+    const text = `<span foreground="${color}"${style}>${escapePango(value)}</span>`;
+    return { input: { text: { text, rgba: true, width, height, ...fontConfig } }, left, top };
+}
 
+async function renderCard(info, ip, os, browser, now) {
+    const [background, weather, ipIcon, browserIcon, locationIcon, osIcon] = await Promise.all([
+        imageAsset('bg.png'), imageAsset(weatherIcon(info.weatherimg)), imageAsset('ico/ip.png'),
+        imageAsset('ico/bro.png'), imageAsset('ico/local.png'), imageAsset('ico/system.png')
+    ]);
+    // Use the real background directly instead of decoding it twice and
+    // compositing it onto a separate blank canvas.
+    return sharp(background).composite([
+        { input: weather, left: 40, top: 50 },
+        overlayText(`温度：${info.real ?? ''} 湿度: ${info.humidity ?? ''}%RH`, 200, 30, 140, 80),
+        overlayText(`风向：${info.wind ?? ''}${info.windsc ?? ''} 空气质量：${info.quality ?? ''}`, 200, 30, 140, 105),
+        overlayText(`更新时间：${dateFormat.format(now)}`, 240, 20, 140, 123, 55),
+        { input: ipIcon, left: 140, top: 170 },
+        overlayText(ip, 100, 20, 160, 173, 45),
+        { input: browserIcon, left: 280, top: 170 },
+        overlayText(browser, 110, 16, 300, 173, 48),
+        { input: locationIcon, left: 140, top: 190 },
+        overlayText(`${info.province ?? ''}-${info.area ?? ''}`, 110, 16, 160, 193, 48),
+        { input: osIcon, left: 280, top: 190 },
+        overlayText(os, 110, 16, 300, 193, 48),
+        overlayText(info.weather || '未知', 110, 16, 65, 132, 60)
+    ]).png().toBuffer();
+}
 
-    try {
-        canvas.composite([
-            {input: await bgImage.toBuffer(), left: 0, top: 0},
-            {input: await weatherIcons.toBuffer(), left: 40, top: 50},
-            {input: {text: firstLine}, left: 140, top: 80},
-            {input: {text: secondLine}, left: 140, top: 105},
-            {input: {text: thirdLine}, left: 140, top: 123},
-            {input: await ipImg.toBuffer(), left: 140, top: 170},
-            {input: {text: ipText}, left: 160, top: 173},
-            {input: await broImg.toBuffer(), left: 280, top: 170},
-            {input: {text: browserText}, left: 300, top: 173},
-            {input: await localImg.toBuffer(), left: 140, top: 190},
-            {input: {text: localText}, left: 160, top: 193},
-            {input: await systemImg.toBuffer(), left: 280, top: 190},
-            {input: {text: osText}, left: 300, top: 193},
-            {input: {text: weatherText}, left: 65, top: 132},
-            // {input: await tipImg.toBuffer(), left: 140, top: 210},
-            // {input: {text: tipText}, left: 160, top: 212},
-        ]);
-
-        const outputFileName = `weather/${uuidv4()}.png`;
-        const imageBuffer = await canvas.png().toBuffer();
-
-        if (isJson) {
-
-            if (process.env.IS_VERCEL === 'true') {
-                const blobImgUrl = await vercelBlobUpload(imageBuffer, outputFileName);
-                return {imageUrl: blobImgUrl, imageBuffer};
-            }else{
-                await canvas.toFile(`output/${outputFileName}`);
-            }
-            return {imageUrl: outputFileName, imageBuffer: ''};
-        } else {
-            return {imageUrl: '', imageBuffer};
+export function createWeatherService({
+    http = axios,
+    upload = vercelBlobUpload,
+    outputDirectory = defaultOutputDirectory,
+    now = () => new Date()
+} = {}) {
+    return async ({ city, ip, os, browser }, isJson = false, isVercel = process.env.IS_VERCEL === 'true') => {
+        const suppliedCity = typeof city === 'string' ? city.trim() : '';
+        // The provider accepts cities or IPv4. Preserve the actual IPv6
+        // address in the card, and use the existing fallback weather city.
+        const queryCity = suppliedCity || (isIPv4(ip) ? ip : '北京');
+        const displayIP = ip || '127.0.0.1';
+        let data;
+        try {
+            ({ data } = await http.get(tianqiEndpoint, {
+                params: { key: process.env.TIAN_XING_KEY, city: queryCity, type: 1 },
+                timeout: 8000
+            }));
+        } catch {
+            return { code: 5000, message: '天气查询失败' };
         }
 
+        if (data?.code !== 200 || !data.result || typeof data.result !== 'object') {
+            return { code: 5000, message: '天气查询失败', data, ip: displayIP, os, browser, city };
+        }
 
-    } catch (e) {
-        throw e;
-    }
-};
+        try {
+            const imageBuffer = await renderCard(data.result, displayIP, os, browser, now());
+            if (!isJson) return { code: 2000, imageUrl: '', imageBuffer };
 
-const iconNameConversion = (icon) => {
-    const iconNameMap = {
-        xue: 'xue.png',
-        yu: 'yu.png',
-        wu: 'wu.png',
-        mai: 'wu.png',
-        sha: 'sha.png',
-        yin: 'yin.png',
-        duoyun: 'duoyun.png',
-        qing: 'qing.png'
+            const imageUrl = `weather/${randomUUID()}.png`;
+            if (isVercel) {
+                return { code: 2000, imageUrl: await upload(imageBuffer, imageUrl), imageBuffer };
+            }
+            await mkdir(join(outputDirectory, 'weather'), { recursive: true });
+            await writeFile(join(outputDirectory, imageUrl), imageBuffer);
+            return { code: 2000, imageUrl, imageBuffer: '' };
+        } catch {
+            return { code: 5000, message: '天气签名图生成失败' };
+        }
     };
-    const iconKey = Object.keys(iconNameMap).find(key => icon.includes(key));
-    return iconKey ? iconNameMap[iconKey] : 'unknow.png';
-};
+}
 
-export const getWeatherData = async ({city, ip, os, browser}, isJson = false) => {
-
-    const url = 'https://apis.tianapi.com/tianqi/index';
-    const queryCity = city || (ip && ip !== '1' ? ip : '');
-    const {data} = await axios.get(url, {
-        params: {
-            key: process.env.TIAN_XING_KEY,
-            city: queryCity || '北京',
-            type: 1,
-        },
-    });
-    if (ip === '1' || !ip) ip = '127.0.0.1';
-
-    if (data.code !== 200) {
-        return {
-            code: 5000,
-            message: '天气查询失败',
-            data: data,
-            ip,
-            os,
-            browser,
-            city
-        };
-    }
-
-
-    try {
-        const {imageUrl, imageBuffer} = await mergeImages(data.result, ip, os, browser, isJson);
-        return {code: 2000, imageUrl, imageBuffer};
-    } catch (error) {
-        return {code: 5000, message: error.message};
-    }
-};
-
-
+export const getWeatherData = createWeatherService();

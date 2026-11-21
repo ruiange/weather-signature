@@ -1,6 +1,8 @@
-import express from "express";
-import {getWeatherImg} from "../controller/mainController.js";
+import express from 'express';
+import { createWeatherImgHandler } from '../controller/mainController.js';
 
-const mainRouter = express.Router();
-mainRouter.all("/", getWeatherImg);
-export default mainRouter;
+export function createMainRouter(options) {
+    const router = express.Router();
+    router.all('/', createWeatherImgHandler(options));
+    return router;
+}

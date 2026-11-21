@@ -8,23 +8,26 @@
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "card": "node src/generate",
-    "init-db": "node src/scripts/init-db.js"
+    "init-db": "node src/scripts/init-db.js",
+    "test": "node --test"
   },
   "keywords": [],
   "author": "ruiange",
   "license": "ISC",
   "dependencies": {
-    "@neondatabase/serverless": "^1.0.0",
-    "@vercel/blob": "^1.0.0",
-    "axios": "1.8.2",
-    "dayjs": "^1.11.13",
-    "dotenv": "^16.3.1",
-    "drizzle-orm": "^0.43.0",
-    "express": "5.0.0",
-    "express-rate-limit": "^7.5.0",
-    "nodemon": "^3.1.9",
-    "sharp": "^0.33.1",
-    "ua-parser-js": "^2.0.3",
-    "uuid": "^9.0.1"
+    "@neondatabase/serverless": "^1.2.1",
+    "@vercel/blob": "2.4.0",
+    "axios": "^1.21.1",
+    "drizzle-orm": "^0.45.4",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
+    "sharp": "^0.35.5",
+    "ua-parser-js": "^2.0.10"
+  },
+  "engines": {
+    "node": "22.x || 24.x"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
   }
 }

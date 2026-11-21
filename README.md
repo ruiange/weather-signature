@@ -53,6 +53,21 @@ axios.get('https://tq.ruiange.com/?type=json')
 
 
 
+### 本地运行与验证
+
+需要 Node.js 22 LTS 或 Node.js 24。Docker 镜像使用 Node.js 22，并监听与 Fly 配置一致的 4000 端口。
+
+```sh
+npm ci
+cp .env.example .env
+npm test
+npm start
+```
+
+仅需要访问天气接口时配置 `TIAN_XING_KEY` 即可。没有 `DATABASE_URL` 时仍可运行，日志写入是可选项。测试使用合成天气数据，本地验证 PNG、JSON、文件输出及限流，不使用实际 API 凭据。自管反代请根据受控链路配置 `TRUST_PROXY_HOPS`；不要在可直连的服务上信任客户端提交的转发信息。
+
+Blob SDK 固定在 `2.4.0`：后续已核对的版本会引入当前审计告警的传递依赖，待上游修复后再升。
+
 ### 部署
 [宝塔部署](doc/bt.md)
 
